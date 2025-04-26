@@ -1,15 +1,10 @@
 "use client"
-import { useAuth } from "@/contexts/AuthContext"
+import { signIn } from "next-auth/react"
 import Image from "next/image"
 
 export default function Login() {
-  const { login } = useAuth()
   function handleLogin() {
-    login({
-      id: '1',
-      name: 'John Doe',
-      email: 'johndoe@gmail.com'
-    })
+    signIn('google', { callbackUrl: '/quiz' })
   }
 
   return (
