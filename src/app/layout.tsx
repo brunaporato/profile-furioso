@@ -16,6 +16,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "FURIOSO PROFILE",
   description: "Profile for FURIA fans",
+  icons: {
+    icon: "/furia-logo.png"
+  }
 };
 
 export default function RootLayout({
