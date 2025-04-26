@@ -4,7 +4,7 @@ import Image from "next/image"
 
 export default function Login() {
   function handleLogin() {
-    signIn('google', { callbackUrl: '/quiz' })
+    signIn('google', { callbackUrl: '/dashboard' })
   }
 
   return (

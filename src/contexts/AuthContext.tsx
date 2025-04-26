@@ -2,12 +2,13 @@
 
 import { createContext, useContext, useState, ReactNode, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { useSession } from 'next-auth/react'
+import { signOut, useSession } from 'next-auth/react'
 
 type User = {
   id: string
   name: string
   email: string
+  image: string
   hasCompletedQuiz: boolean
 }
 
@@ -37,7 +38,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   function logout() {
     setUser(null)
-    router.push('/login')
+    signOut({ callbackUrl: '/login' }) 
   }
 
   useEffect(() => {
@@ -48,12 +49,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (parsedUserData) {
         setUser(parsedUserData)
-        router.push('/dashboard')
       } else {
         const newUserData = {
           id: userId,
           name: session.user.name || '',
           email: session.user.email || '',
+          image: session.user.image || '',
           hasCompletedQuiz: false,
         }
 

@@ -54,7 +54,25 @@ export default function DashboardPage() {
       <div className="max-w-4xl w-full space-y-8">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="w-10 h-10 rounded-full bg-yellow-500" />
+            <div className="w-10 h-10 rounded-full bg-yellow-500 flex items-center justify-center">
+              {user.image ? (
+                <Image
+                  src={user.image}
+                  alt={user.name}
+                  className="w-full h-full rounded-full"
+                  width={40}
+                  height={40}
+                />
+              ) : (
+                <Image
+                  src="/furia-logo.png"
+                  alt="Furia"
+                  className="w-8 h-8"
+                  width={40}
+                  height={40}
+                />
+              )}
+            </div>
             <div className="flex flex-col gap-px">
               <p className="text-xs font-medium uppercase tracking-wider">Bem vindo,</p>
               <p className="font-bold text-lg leading-tight">{user.name}</p>
@@ -63,7 +81,7 @@ export default function DashboardPage() {
 
           <button
             onClick={logout}
-            className="text-red-700 cursor-pointer hover:text-red-500 transition-colors duration-200"
+            className="text-red-500 cursor-pointer hover:text-red-400 transition-colors duration-200"
           >
             <SignOut size={24} />
           </button>
