@@ -1,10 +1,15 @@
 "use client"
-
+import { useAuth } from "@/contexts/AuthContext"
 import Image from "next/image"
 
 export default function Login() {
+  const { login } = useAuth()
   function handleLogin() {
-    alert('login com google') // simulation
+    login({
+      id: '1',
+      name: 'John Doe',
+      email: 'johndoe@gmail.com'
+    })
   }
 
   return (
