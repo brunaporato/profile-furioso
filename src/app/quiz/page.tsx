@@ -3,19 +3,27 @@
 import { useState } from "react"
 import { useAuth } from "@/contexts/AuthContext"
 import { questions } from "@/data/questions"
+import type { AnsweredQuestion } from "@/types/quiz-answers"
 
 export default function QuizPage() {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
+  const [answeredQuestions, setAnsweredQuestions] = useState<AnsweredQuestion[]>([])
   
   const { completeQuiz } = useAuth()
 
   const currentQuestion = questions[currentQuestionIndex]
 
-  function handleAnswer() {
+  function handleAnswer(answer: string) {
+    const currentAnsweredQuestion: AnsweredQuestion = {
+      questionIndex: currentQuestionIndex,
+      answer: answer,
+    }
+    setAnsweredQuestions((prev) => [...prev, currentAnsweredQuestion])
+
     if (currentQuestionIndex + 1 < questions.length) {
       setCurrentQuestionIndex((prev) => prev + 1)
     } else {
-      completeQuiz()
+      completeQuiz([...answeredQuestions, currentAnsweredQuestion])
     }
   }
 
@@ -37,7 +45,7 @@ export default function QuizPage() {
             {currentQuestion.options.map(option => (
               <button
                 key={option}
-                onClick={() => handleAnswer()}
+                onClick={() => handleAnswer(option)}
                 className="bg-zinc-100 border border-zinc-500 text-zinc-900 p-1.5 rounded hover:bg-zinc-300 transition duration-200 cursor-pointer"
               >
                 {option}

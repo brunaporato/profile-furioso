@@ -3,6 +3,11 @@ import { useAuth } from "@/contexts/AuthContext";
 import { SignOut } from "@phosphor-icons/react";
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { getFanLevel } from "@/utils/getFanLevel";
+import type { AnsweredQuestion } from "@/types/quiz-answers";
+import { getGameplayStyle } from "@/utils/getGameplayStyle";
+import { getRecommendedChannel } from "@/utils/getRecommendedChannel";
 
 interface YoutubeVideo {
   id: {
@@ -24,8 +29,12 @@ interface YoutubeVideo {
 export default function DashboardPage() {
   const { user, logout } = useAuth()
   const [ytVideos, setYtVideos] = useState<YoutubeVideo[]>([])
-  
+  const [fanLevel, setFanLevel] = useState<string>("")
+  const [gameplayStyle, setGameplayStyle] = useState<string>("")
+  const [recommendedContent, setRecommendedContent] = useState<string>("")
 
+  const router = useRouter()
+  
   async function fetchFuriaVideos() {
     const ytApiKey = process.env.NEXT_PUBLIC_YOUTUBE_API_KEY
     const furiaChannelID = "UCT1F3iuRk0j7owMzNC09q1w"
@@ -36,7 +45,6 @@ export default function DashboardPage() {
     try {
       const response = await fetch(url)
       const data = await response.json()
-      console.log("data:", data)
       setYtVideos(data.items)
     } catch (error) {
       console.log("Error fetching YouTube videos:", error)
@@ -44,8 +52,32 @@ export default function DashboardPage() {
   }
 
   useEffect(() => {
-    fetchFuriaVideos()
-  }, [])
+    if (user) {
+      async function generateFanProfile() {
+        if (!user) return null
+        
+        const userId = `${user.email}-${user.name}`
+        const quizAnswers = localStorage.getItem(`furioso-quiz-${userId}`)
+        
+        if (!quizAnswers) {
+          return router.push("/quiz")
+        }
+    
+        const parsedQuizAnswers: AnsweredQuestion[] = await JSON.parse(quizAnswers)
+    
+        const fanLevel = getFanLevel(parsedQuizAnswers.filter(answeredQuestion => answeredQuestion.questionIndex === 1)[0].answer)
+        const recommendedContent = getRecommendedChannel(parsedQuizAnswers.filter(answeredQuestion => answeredQuestion.questionIndex === 2)[0].answer)
+        const gameplayStyle = getGameplayStyle(parsedQuizAnswers.filter(answeredQuestion => answeredQuestion.questionIndex === 3)[0].answer)
+  
+        setFanLevel(fanLevel)
+        setGameplayStyle(gameplayStyle)
+        setRecommendedContent(recommendedContent)
+      }
+  
+      generateFanProfile()
+      fetchFuriaVideos()
+    }
+  }, [router, user])
 
   if (!user) return null
 
@@ -93,17 +125,20 @@ export default function DashboardPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="bg-zinc-900 p-4 rounded-xl space-y-2">
               <h3 className="text-lg font-bold">Nível de Fã</h3>
-              <p className="uppercase text-sm">Furioso 🔥</p>
+              <p className="uppercase text-sm">{fanLevel}🔥</p>
             </div>
 
             <div className="bg-zinc-900 p-4 rounded-xl space-y-2">
               <h3 className="text-lg font-bold">Estilo favorito</h3>
-              <p className="uppercase text-sm">Competitivo 🎯</p>
+              <p className="uppercase text-sm">{gameplayStyle} 🎯</p>
             </div>
 
             <div className="bg-zinc-900 p-4 rounded-xl space-y-2">
               <h3 className="text-lg font-bold">Recomendação</h3>
-              <p className="uppercase text-sm">Assista a última final da FURIA! 🏆</p>
+              <p className="text-sm">
+                Corre conferir as últimas notícias da {' '}
+                <a href={recommendedContent} className="font-black underline">FURIA</a> 🏆
+              </p>
             </div>
           </div>
         </section>

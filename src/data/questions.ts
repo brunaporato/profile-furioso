@@ -14,4 +14,15 @@ export const questions = [
     question: 'Qual rede social você mais usa para acompanhar a FURIA?',
     options: ['Instagram', 'Twitter/X', 'TikTok', 'YouTube'],
   },
+  {
+    id: 4,
+    question: "Quem é seu player favorito?",
+    options: [
+      "KSCERATO",
+      "yuurih",
+      "arT",
+      "chelo",
+      "fallen",
+    ],
+  }
 ]

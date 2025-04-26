@@ -3,6 +3,7 @@
 import { createContext, useContext, useState, ReactNode, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { signOut, useSession } from 'next-auth/react'
+import type { AnsweredQuestion } from '@/types/quiz-answers'
 
 type User = {
   id: string
@@ -15,7 +16,7 @@ type User = {
 type AuthContextType = {
   user: User | null
   logout: () => void
-  completeQuiz: () => void
+  completeQuiz: (answeredQuestions: AnsweredQuestion[]) => void
 }
 
 const AuthContext = createContext({} as AuthContextType)
@@ -25,12 +26,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const router = useRouter()
 
-  function completeQuiz() {
+  function completeQuiz(answeredQuestions: AnsweredQuestion[]) {
     if (user) {
       const updatedUser = { ...user, hasCompletedQuiz: true }
       setUser(updatedUser)
 
       localStorage.setItem(`furioso-profile-${user.id}`, JSON.stringify(updatedUser))
+      localStorage.setItem(`furioso-quiz-${user.id}`, JSON.stringify(answeredQuestions))
 
       router.push('/dashboard') 
     }
@@ -38,6 +40,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   function logout() {
     setUser(null)
+    localStorage.removeItem(`furioso-profile-${user?.id}`)
     signOut({ callbackUrl: '/login' }) 
   }
 
@@ -47,7 +50,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const userData = localStorage.getItem(`furioso-profile-${userId}`)
       const parsedUserData = userData ? JSON.parse(userData) : null
 
-      if (parsedUserData) {
+      const userDataQuiz = localStorage.getItem(`furioso-quiz-${userId}`)
+
+      if (userDataQuiz) {
         setUser(parsedUserData)
       } else {
         const newUserData = {
