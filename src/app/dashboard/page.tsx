@@ -8,23 +8,8 @@ import { getFanLevel } from "@/utils/getFanLevel";
 import type { AnsweredQuestion } from "@/types/quiz-answers";
 import { getGameplayStyle } from "@/utils/getGameplayStyle";
 import { getRecommendedChannel } from "@/utils/getRecommendedChannel";
-
-interface YoutubeVideo {
-  id: {
-    videoId: string
-  }
-  snippet: {
-    title: string
-    description: string
-    thumbnails: {
-      high: {
-        url: string
-        width: number
-        height: number
-      }
-    }
-  }
-}
+import { getYoutubeVideos } from "@/utils/getYoutubeVideos";
+import type { YoutubeVideo } from "@/types/youtube-video";
 
 export default function DashboardPage() {
   const { user, logout } = useAuth()
@@ -34,22 +19,6 @@ export default function DashboardPage() {
   const [recommendedContent, setRecommendedContent] = useState<string>("")
 
   const router = useRouter()
-  
-  async function fetchFuriaVideos() {
-    const ytApiKey = process.env.NEXT_PUBLIC_YOUTUBE_API_KEY
-    const furiaChannelID = "UCT1F3iuRk0j7owMzNC09q1w"
-    const maxResults = 5
-
-    const url = `https://www.googleapis.com/youtube/v3/search?key=${ytApiKey}&channelId=${furiaChannelID}&part=snippet,id&order=date&maxResults=${maxResults}`
-    
-    try {
-      const response = await fetch(url)
-      const data = await response.json()
-      setYtVideos(data.items)
-    } catch (error) {
-      console.log("Error fetching YouTube videos:", error)
-    }
-  }
 
   useEffect(() => {
     if (user) {
@@ -75,7 +44,12 @@ export default function DashboardPage() {
       }
   
       generateFanProfile()
-      fetchFuriaVideos()
+      const videos = getYoutubeVideos()
+      videos.then(videos => {
+        if (videos && !('error' in videos)) {
+          setYtVideos(videos.items)
+        }
+      })
     }
   }, [router, user])
 
@@ -143,7 +117,7 @@ export default function DashboardPage() {
           </div>
         </section>
 
-        {ytVideos && (
+        {ytVideos && ytVideos.length > 0 && (
           <section className="bg-zinc-800 p-6 rounded-2xl space-y-4 md:space-y-8 border border-zinc-700">
             <h2 className="text-2xl font-semibold text-center md:text-start">Últimos vídeos da FURIA</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
