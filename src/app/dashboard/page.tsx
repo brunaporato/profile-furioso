@@ -10,9 +10,12 @@ import { getGameplayStyle } from "@/utils/getGameplayStyle";
 import { getRecommendedChannel } from "@/utils/getRecommendedChannel";
 import { getYoutubeVideos } from "@/utils/getYoutubeVideos";
 import type { YoutubeVideo } from "@/types/youtube-video";
+import { useSession } from "next-auth/react";
 
 export default function DashboardPage() {
-  const { user, logout } = useAuth()
+  const { data: session } = useSession()
+
+  const { logout } = useAuth()
   const [ytVideos, setYtVideos] = useState<YoutubeVideo[]>([])
   const [fanLevel, setFanLevel] = useState<string>("")
   const [gameplayStyle, setGameplayStyle] = useState<string>("")
@@ -21,11 +24,9 @@ export default function DashboardPage() {
   const router = useRouter()
 
   useEffect(() => {
-    if (user) {
-      async function generateFanProfile() {
-        if (!user) return null
-        
-        const userId = `${user.email}-${user.name}`
+    if (session?.user) {
+      async function generateFanProfile() {        
+        const userId = `${session?.user?.email}-${session?.user?.name}`
         const quizAnswers = localStorage.getItem(`furioso-quiz-${userId}`)
         
         if (!quizAnswers) {
@@ -51,9 +52,9 @@ export default function DashboardPage() {
         }
       })
     }
-  }, [router, user])
+  }, [router, session])
 
-  if (!user) return null
+  if (!session?.user) return null
 
   return (
     <main className="flex flex-col min-h-screen items-center bg-zinc-900 text-zinc-50 p-4 md:py-8">
@@ -61,10 +62,10 @@ export default function DashboardPage() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="w-10 h-10 rounded-full bg-yellow-500 flex items-center justify-center">
-              {user.image ? (
+              {session.user.image ? (
                 <Image
-                  src={user.image}
-                  alt={user.name}
+                  src={session.user.image}
+                  alt={session.user.name ?? "Usuário"}
                   className="w-full h-full rounded-full"
                   width={40}
                   height={40}
@@ -81,7 +82,7 @@ export default function DashboardPage() {
             </div>
             <div className="flex flex-col gap-px">
               <p className="text-xs font-medium uppercase tracking-wider">Bem vindo,</p>
-              <p className="font-bold text-lg leading-tight">{user.name}</p>
+              <p className="font-bold text-lg leading-tight">{session.user.name ?? "FURIOSO"}</p>
             </div>
           </div>
 
@@ -135,6 +136,7 @@ export default function DashboardPage() {
                     className="w-full mb-2"
                     width={video.snippet.thumbnails.high.width}
                     height={video.snippet.thumbnails.high.height}
+                    priority
                   />
                   <p className="px-4 line-clamp-3">{video.snippet.title}</p>
                 </a>
