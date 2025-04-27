@@ -38,11 +38,11 @@ npm run dev
 
 ---
 ## Tecnologias usadas
-- Next.js 14
+- Next.js 15
 - TypeScript
 - Next Auth
 - TailwindCSS
 
 ---
-## Feito com 🖤 por uma fã da FURIA
+## Feito com 🖤 
 [brunaporato](https://linkedin.com/in/brunaporato)
